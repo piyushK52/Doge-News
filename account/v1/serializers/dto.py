@@ -1,4 +1,4 @@
-from app.models import Like, Post, User, Vote
+from app.models import Like, Post, Topic, User, Vote
 from rest_framework import serializers
 
 
@@ -14,16 +14,8 @@ class TopicDto(serializers.ModelSerializer):
         fields = ('title', 'desc', 'url', 'category', 'source_name')
 
 
-
-class LikeDto(serializers.ModelSerializer):
-    class Meta:
-        model = Like
-        fields = ('value')
-
-
 class PostDto(serializers.ModelSerializer):
     topic = TopicDto()
-    like = LikeDto()
     
     class Meta:
         model = Post
@@ -33,4 +25,10 @@ class PostDto(serializers.ModelSerializer):
 class VoteDto(serializers.ModelSerializer):
     class Meta:
         model = Vote
-        fields = ('post', 'value')
+        fields = ('post_uuid', 'value')
+
+
+class TopicDto(serializers.ModelSerializer):
+    class Meta:
+        meta = Topic
+        fields = ('title', 'desc', 'url', 'category', 'created_on', 'source_name')
