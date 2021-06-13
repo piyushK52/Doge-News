@@ -25,6 +25,7 @@ class User(BaseModel):
     email = models.CharField(max_length=255, default="")
     password = models.CharField(max_length=45, default="")
     image_url = models.CharField(max_length=255, default="")
+    bio = models.CharField(max_length=255, default="")
 
 
 class Topic(BaseModel):
