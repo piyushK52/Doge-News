@@ -1,5 +1,5 @@
 from django.db.models.aggregates import Sum
-from account.service import remove_all_post_activity
+from post.service import remove_all_post_activity
 from account.v1.serializers.dto import PostDto
 from app.models import Post, Vote
 from account.v1.serializers.dao import AddPostDao, UUIDDao, UpdatePostDao
@@ -69,7 +69,7 @@ class PostCrudView(APIView):
             return success({}, 'invalid uuid', False)
 
         # fetching upvotes/downvotes of this post
-        vote_count = Vote.objects.filter(post_uuid=attributes.data['uuid']).aggregate(Sum('value'))
+        vote_count = Vote.objects.filter(post_uuid=attributes.data['uuid']).aggregate(Sum('value'))['value__sum']
 
         user_vote = Vote.objects.filter(post_uuid=attributes.data['uuid'], user_uuid=attributes.data['user_uuid']).first().value
 
