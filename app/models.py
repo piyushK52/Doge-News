@@ -54,7 +54,7 @@ class Comment(BaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
 
-class Like(BaseModel):
+class Vote(BaseModel):
     uuid = models.UUIDField(default=uuid.uuid4)
     value = models.IntegerField(default=0)
     post = models.ForeignKey(Post, on_delete=models.CASCADE)

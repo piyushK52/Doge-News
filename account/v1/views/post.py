@@ -1,7 +1,6 @@
 from account.service import remove_all_post_activity
 from account.v1.serializers.dto import PostDto
 from app.models import Post
-from django.core.exceptions import BadRequest
 from account.v1.serializers.dao import AddPostDao, UUIDDao, UpdatePostDao
 from middleware.response import bad_request, error, success
 from rest_framework.views import APIView
@@ -12,7 +11,7 @@ class PostCrudView(APIView):
     def post(self, request):
         attributes = AddPostDao(data=request.data)
         if not attributes.is_valid():
-            return BadRequest(attributes.error)
+            return bad_request(attributes.error)
 
         post = Post.objects.create(**attributes.data)
         response = {
@@ -73,6 +72,3 @@ class PostCrudView(APIView):
         }
 
         return success(response, 'post fethced successfully', True)
-
-        
-        

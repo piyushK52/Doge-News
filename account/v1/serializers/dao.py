@@ -32,3 +32,13 @@ class UpdatePostDao(serializers.Serializer):
     caption = serializers.CharField(max_length=255)
     image_url = serializers.CharField(max_length=255)
     video_url = serializers.CharField(max_length=255)
+
+
+class UpdateVoteDao(serializers.Serializer):
+    uuid = serializers.CharField(max_length=100)
+    increment = serializers.IntegerField()
+
+
+class GetVoteDao(serializers.Serializer):
+    post_uuid = serializers.CharField(max_length=100)
+    user_uuid = serializers.CharField(max_length=100)
