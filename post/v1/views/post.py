@@ -15,6 +15,7 @@ class PostCrudView(APIView):
             return bad_request(attributes.error)
 
         post = Post.objects.create(**attributes.data)
+        
         response = {
             'data': PostDto(post).data
         }

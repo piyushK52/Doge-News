@@ -1,4 +1,5 @@
 from django.db import models
+from util.hash import PBKDF2PasswordHasher
 import uuid
 
 
@@ -27,6 +28,14 @@ class User(BaseModel):
     image_url = models.CharField(max_length=255, default="")
     bio = models.CharField(max_length=255, default="")
 
+    def save(self, *args, **kwargs):
+        if not self.id:
+            password = ""
+            if self.password:
+                password = self.password
+            self.password = PBKDF2PasswordHasher().encode(password)
+        super(User, self).save(*args, **kwargs)
+
 
 class Topic(BaseModel):
     uuid = models.UUIDField(default=uuid.uuid4)
@@ -51,7 +60,8 @@ class Comment(BaseModel):
     uuid = models.UUIDField(default=uuid.uuid4)
     content = models.TextField(default="")
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
-    parent = models.IntegerField(default=0, null=True)
+    # parent = models.IntegerField(default=0, null=True)
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, default=0, null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
 
