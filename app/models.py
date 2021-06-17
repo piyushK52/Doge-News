@@ -1,3 +1,5 @@
+import hashlib
+import os
 from django.db import models
 from util.hash import PBKDF2PasswordHasher
 import uuid
@@ -28,6 +30,9 @@ class User(BaseModel):
     image_url = models.CharField(max_length=255, default="")
     bio = models.CharField(max_length=255, default="")
 
+    class Meta:
+        db_table = 'user'
+
     def save(self, *args, **kwargs):
         if not self.id:
             password = ""
@@ -46,6 +51,9 @@ class Topic(BaseModel):
     source_name = models.CharField(max_length=45)
     user = models.ForeignKey(User)
 
+    class Meta:
+        db_table = 'topic'
+
 
 class Post(BaseModel):
     uuid = models.UUIDField(default=uuid.uuid4)
@@ -54,6 +62,9 @@ class Post(BaseModel):
     video_url = models.CharField(max_length=255, default=None, null=True)
     topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = 'post'
 
 
 class Comment(BaseModel):
@@ -64,9 +75,28 @@ class Comment(BaseModel):
     parent = models.ForeignKey('self', on_delete=models.CASCADE, default=0, null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
+    class Meta:
+        db_table = 'comment'
+
 
 class Vote(BaseModel):
     uuid = models.UUIDField(default=uuid.uuid4)
     value = models.IntegerField(default=0)
     post_uuid = models.ForeignKey(Post, on_delete=models.CASCADE)
     user_uuid = models.ForeignKey(User)
+
+    class Meta:
+        db_table = 'vote'
+
+
+class Session(BaseModel):
+    token = models.CharField(max_length=255, default=None, null=True)
+    id = models.IntegerField()
+
+    class Meta:
+        db_table = 'session'
+
+    def save(self, *args, **kwargs):
+        self.token = str(hashlib.sha1(os.urandom(128)).hexdigest())[:26]
+        super(Session, self).save(*args, **kwargs)
+

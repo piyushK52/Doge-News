@@ -2,7 +2,7 @@ from util.hash import PBKDF2PasswordHasher
 from authentication.v1.serializers.dao import UserLoginDao
 from rest_framework.views import APIView
 from middleware.response import success, bad_request
-from app.models import User
+from app.models import Session, User
 
 class LoginView(APIView):
     def post(self, request):
@@ -19,7 +19,7 @@ class LoginView(APIView):
         if user.password != password:
             return success({}, 'invalid username or password', False)
 
-        session = Session.objects.create(role_id=user.id)
+        session = Session.objects.create(id=user.id)
 
         response = {
             'token': session.token,
