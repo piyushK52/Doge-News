@@ -1,14 +1,26 @@
-from app.models import Session
-from django.http import HttpResponse
+from app.models import Session, User
+from middleware.response import unauthorized
+from django.apps import apps
 
-class CustomTokenAuthentication(object):
+def auth_required(*users):
+    def authenticator(func):
+        def wrap(context, request):
+            if 'HTTP_AUTHORIZATION' not in request.META:
+                return unauthorized({})
 
-    def process_request(self, request):
-        access_token = request.META.get('TOKEN', '')
-        if Session.objects.filter(token=access_token).exists():
-            return None
-        else:
-            # return None
-            res =  HttpResponse("Invalid token", status=401)
-            res["WWW-Authenticate"] = "Invalid Token"
-            return res
+            auth_token = request.META['HTTP_AUTHORIZATION']
+            auth_token = auth_token.replace('Bearer ', '')
+
+            session = Session.objects.filter(token=auth_token).first()
+            if not session:
+                return unauthorized({})
+
+            if session.role_type in users:
+                request.user = User.objects.get(uuid=session.user_uuid)
+                request.token = auth_token
+                return func(context, request)
+            else:
+                return unauthorized({})
+        wrap.__name__ = func.__name__
+        return wrap
+    return authenticator

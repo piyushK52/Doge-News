@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from app.models import Post, Vote, Topic
+from app.models import Comment, Post, Vote, Topic
 
 
 class VoteDto(serializers.ModelSerializer):
@@ -20,3 +20,14 @@ class PostDto(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = ('caption', 'image_url', 'video_url', 'created_on')
+
+
+class CommentDto(serializers.ModelSerializer):
+    vote_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Comment
+        fields = ('vote_count')
+    
+    def get_vote_count(self, obj):
+        return self.context['vote_count']

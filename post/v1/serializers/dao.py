@@ -42,3 +42,8 @@ class UpdateTopicDao(serializers.Serializer):
     category = serializers.CharField(max_length=45)
     source_name = serializers.CharField(max_length=45)
     user_uuid = serializers.CharField(max_length=100)
+
+
+class CommentListDao(serializers.Serializer):
+    post_uuid = serializers.CharField(max_length=255)
+    page = serializers.IntegerField()

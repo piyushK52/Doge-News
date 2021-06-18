@@ -44,7 +44,7 @@ class PostCrudView(APIView):
 
 
     def delete(self, request):
-        attributes = UUIDDao(data=request.query_params)
+        attributes = UUIDDao(data=request.data)
         if not attributes.is_valid():
             return bad_request(attributes.errors)
 
@@ -61,7 +61,7 @@ class PostCrudView(APIView):
 
 
     def get(self, request):
-        attributes = UUIDDao(data=request.query_params)
+        attributes = UUIDDao(data=request.data)
         if not attributes.is_valid():
             return bad_request(attributes.errors)
 
@@ -72,7 +72,7 @@ class PostCrudView(APIView):
         # fetching upvotes/downvotes of this post
         vote_count = Vote.objects.filter(post_uuid=attributes.data['uuid']).aggregate(Sum('value'))['value__sum']
 
-        user_vote = Vote.objects.filter(post_uuid=attributes.data['uuid'], user_uuid=attributes.data['user_uuid']).first().value
+        user_vote = Vote.objects.filter(post_uuid=attributes.data['uuid'], user_uuid=request.user.uuid).first().value
 
         data = {
             'post': PostDto(post).data,
