@@ -1,7 +1,10 @@
+from post.v1.serializers.dao import PostListDao
+from django.core.paginator import Paginator
 from django.db.models.aggregates import Sum
+from django.db.models.fields import NullBooleanField
 from post.service import remove_all_post_activity
 from account.v1.serializers.dto import PostDto
-from app.models import Post, Vote
+from app.models import Comment, Post, Vote
 from account.v1.serializers.dao import AddPostDao, UUIDDao, UpdatePostDao
 from middleware.response import bad_request, error, success
 from rest_framework.views import APIView
@@ -87,3 +90,43 @@ class PostCrudView(APIView):
         }
 
         return success(response, 'post fethced successfully', True)
+
+
+class PostListView(APIView):
+
+    def get(self, request):
+        # fetching posts through pagination
+        attributes = PostListDao(data=request.query_params)
+        if not attributes.is_valid():
+            return bad_request(attributes.errors)
+
+        post_list = Post.objects.filter(post_uuid=attributes.data['post_uuid']).all()
+
+        data_per_page = 6
+        paginator = Paginator(post_list, data_per_page)
+        if attributes.data['page'] > paginator.num_pages:
+            return success({}, "invalid page number", False)
+        
+        paged_post_object_list = paginator.page(attributes.data['page']).object_list
+        paged_post_list = []
+        for post in paged_post_object_list:
+            vote_count = Vote.objects.filter(post_uuid=attributes.data['uuid']).aggregate(Sum('value'))['value__sum']
+            comment_count = Comment.objects.filter(post_uuid=attributes.data['uuid']).exclude(parent_comment_uuid__isnull=True).aggregate(Sum('value'))['value__sum']
+            paged_post_list.append(
+                {
+                    'post': PostDto(post).data,
+                    'vote_count': vote_count,
+                    'comment_count': comment_count
+                }
+            )
+
+
+        response = {
+            'data_per_page': data_per_page,
+            'count': paginator.count,
+            'total_pages': paginator.num_pages,
+            'current_page': attributes.data['page'],
+            'data': paged_post_list
+        }
+
+        return success(response, "post list fetched successfully", True)

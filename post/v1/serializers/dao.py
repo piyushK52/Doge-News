@@ -47,3 +47,7 @@ class UpdateTopicDao(serializers.Serializer):
 class CommentListDao(serializers.Serializer):
     post_uuid = serializers.CharField(max_length=255)
     page = serializers.IntegerField()
+
+
+class PostListDao(serializers.Serializer):
+    page = serializers.IntegerField()
