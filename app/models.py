@@ -99,8 +99,8 @@ class CommentVote(BaseModel):
 
 
 class Session(BaseModel):
-    token = models.CharField(max_length=255, default=None, null=True)
-    uuid = models.CharField(max_length=255, default=None, null=True)
+    token = models.CharField(max_length=255)
+    uuid = models.CharField(max_length=255)
     user_uuid = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
@@ -110,3 +110,8 @@ class Session(BaseModel):
         self.token = str(hashlib.sha1(os.urandom(128)).hexdigest())[:26]
         super(Session, self).save(*args, **kwargs)
 
+
+class Relationship(BaseModel):
+    uuid = models.CharField(max_length=45)
+    follower_user_uuid = models.ForeignKey(User, on_delete=models.CASCADE)
+    followed_user_uuid = models.ForeignKey(User, on_delete=models.CASCADE)
