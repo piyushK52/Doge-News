@@ -1,4 +1,5 @@
-from post.v1.serializers.dao import CommentListDao
+from middleware.auth import auth_required
+from post.v1.serializers.dao import AddCommentDao, CommentListDao
 from django.db.models.aggregates import Sum
 from post.v1.serializers.dto import CommentDto
 from django.db import connection
@@ -11,6 +12,7 @@ from django.core.paginator import Paginator
 
 class CommentCrudView(APIView):
 
+    @auth_required()
     def post(self, request):
         attributes = AddCommentDao(data=request.data)
 
@@ -25,11 +27,12 @@ class CommentCrudView(APIView):
 
         return success(response, 'comment created successfully', True)
 
-
+    @auth_required()
     def put(self, request):
         # feature to be added later
         2
 
+    @auth_required()
     def delete(self, request):
         attributes = UUIDDao(data=request.data)
         if not attributes.is_valid():
@@ -44,6 +47,7 @@ class CommentCrudView(APIView):
         return success({}, 'comment deleted successfully', True)
 
     # fetches a particular comment and its children
+    @auth_required()
     def get(self, request):
         attributes = UUIDDao(data=request.data)
         if not attributes.is_valid():
@@ -80,6 +84,7 @@ class CommentCrudView(APIView):
 
 class CommentListView(APIView):
 
+    @auth_required()
     def get(self, request):
         # fetching all the comments (not their replies) for a post
         attributes = CommentListDao(data=request.query_params)

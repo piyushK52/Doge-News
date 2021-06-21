@@ -51,3 +51,11 @@ class CommentListDao(serializers.Serializer):
 
 class PostListDao(serializers.Serializer):
     page = serializers.IntegerField()
+
+
+class AddCommentDao(serializers.Serializer):
+    uuid = serializers.CharField(max_length=45)
+    content = serializers.TextField()
+    post_uuid = serializers.CharField(max_length=45)
+    parent_comment_uuid = serializers.CharField(max_length=45)
+    user_uuid = serializers.CharField(max_length=45)

@@ -1,3 +1,4 @@
+from middleware.auth import auth_required
 from post.v1.serializers.dao import PostListDao
 from django.core.paginator import Paginator
 from django.db.models.aggregates import Sum
@@ -11,7 +12,7 @@ from rest_framework.views import APIView
 
 
 class PostCrudView(APIView):
-
+    @auth_required()
     def post(self, request):
         attributes = AddPostDao(data=request.data)
         if not attributes.is_valid():
@@ -25,7 +26,7 @@ class PostCrudView(APIView):
 
         return success(response, "post created successfully", True)
 
-    
+    @auth_required()
     def put(self, request):
         attributes = UpdatePostDao(data=request.data)
         if not attributes.is_valid():
@@ -45,7 +46,7 @@ class PostCrudView(APIView):
         }
         return success(response, 'post updated successfully', True)
 
-
+    @auth_required()
     def delete(self, request):
         attributes = UUIDDao(data=request.data)
         if not attributes.is_valid():
@@ -62,7 +63,7 @@ class PostCrudView(APIView):
 
         return success({}, 'account deleted successfully', True)
 
-
+    @auth_required()
     def get(self, request):
         attributes = UUIDDao(data=request.data)
         if not attributes.is_valid():
@@ -93,7 +94,7 @@ class PostCrudView(APIView):
 
 
 class PostListView(APIView):
-
+    @auth_required()
     def get(self, request):
         # fetching posts through pagination
         attributes = PostListDao(data=request.query_params)

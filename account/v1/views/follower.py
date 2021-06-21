@@ -1,3 +1,4 @@
+from middleware.auth import auth_required
 from account.v1.serializers.dto import RelationshipDto, UserDto
 from app.models import Relationship, User
 from middleware.response import bad_request, success
@@ -7,6 +8,7 @@ from account.v1.serializers.dao import UUIDDao
 class FollowerView(APIView):
 
     # for following someone
+    @auth_required()
     def post(self, request):
         attributes = UUIDDao(data=request.data)
 
@@ -29,6 +31,7 @@ class FollowerView(APIView):
 
 
     # for un-following someone
+    @auth_required()
     def delete(self, request):
         attributes = UUIDDao(data=request.data)
 
@@ -46,6 +49,7 @@ class FollowerView(APIView):
 
 
     # for fetching follower count of a particular user
+    @auth_required()
     def get(self, request):
         attributes = UUIDDao(data=request.query_params)
 

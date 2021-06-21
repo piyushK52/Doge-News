@@ -2,7 +2,7 @@ from app.models import Session, User
 from middleware.response import unauthorized
 from django.apps import apps
 
-def auth_required(*users):
+def auth_required():
     def authenticator(func):
         def wrap(context, request):
             if 'HTTP_AUTHORIZATION' not in request.META:
@@ -15,12 +15,9 @@ def auth_required(*users):
             if not session:
                 return unauthorized({})
 
-            if session.role_type in users:
-                request.user = User.objects.get(uuid=session.user_uuid)
-                request.token = auth_token
-                return func(context, request)
-            else:
-                return unauthorized({})
+            request.user = User.objects.get(uuid=session.user_uuid)
+            request.token = auth_token
+            return func(context, request)
         wrap.__name__ = func.__name__
         return wrap
     return authenticator

@@ -1,3 +1,4 @@
+from middleware.auth import auth_required
 from account.service import remove_all_user_activity
 from account.v1.serializers.dto import UserDto
 from app.models import User
@@ -7,7 +8,7 @@ from rest_framework.views import APIView
 
 
 class UserCrudView(APIView):
-
+    @auth_required()
     def post(self, request):
         attributes = AddUserDao(data=request.data)
         if not attributes.is_valid():
@@ -20,7 +21,7 @@ class UserCrudView(APIView):
 
         return success(response, "user created successfully", True)
 
-    
+    @auth_required()
     def put(self, request):
         attributes = UpdateUserDao(data=request.data)
         if not attributes.is_valid():
@@ -40,7 +41,7 @@ class UserCrudView(APIView):
         }
         return success(response, 'user updated successfully', True)
 
-
+    @auth_required()
     def delete(self, request):
         attributes = UUIDDao(data=request.query_params)
         if not attributes.is_valid():
@@ -57,7 +58,7 @@ class UserCrudView(APIView):
 
         return success({}, 'account deleted successfully', True)
 
-
+    @auth_required()
     def get(self, request):
         attributes = UUIDDao(data=request.query_params)
         if not attributes.is_valid():
