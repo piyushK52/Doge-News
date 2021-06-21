@@ -49,7 +49,7 @@ class Topic(BaseModel):
     url = models.CharField(max_length=255, default=None, null=True)
     category = models.CharField(max_length=45, default=None)
     source_name = models.CharField(max_length=45)
-    user_uuid = models.ForeignKey(User)
+    user_uuid = models.ForeignKey(User, on_delete=models.DO_NOTHING)
 
     class Meta:
         db_table = 'topic'
@@ -82,7 +82,7 @@ class Vote(BaseModel):
     uuid = models.UUIDField(default=uuid.uuid4)
     value = models.IntegerField(default=0)
     post_uuid = models.ForeignKey(Post, on_delete=models.CASCADE)
-    user_uuid = models.ForeignKey(User)
+    user_uuid = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'vote'
@@ -113,5 +113,8 @@ class Session(BaseModel):
 
 class Relationship(BaseModel):
     uuid = models.CharField(max_length=45)
-    follower_user_uuid = models.ForeignKey(User, on_delete=models.CASCADE)
-    followed_user_uuid = models.ForeignKey(User, on_delete=models.CASCADE)
+    follower_user_uuid = models.ForeignKey(User, on_delete=models.CASCADE, related_name='follower')
+    followed_user_uuid = models.ForeignKey(User, on_delete=models.CASCADE, related_name='followed')
+
+    class Meta:
+        db_table = 'relationship'
