@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 
 class TopicCrudView(APIView):
     @auth_required()
-    def topic(self, request):
+    def post(self, request):
         attributes = AddTopicDao(data=request.data)
         if not attributes.is_valid():
             return bad_request(attributes.error)
