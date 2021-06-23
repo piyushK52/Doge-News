@@ -11,4 +11,5 @@ urlpatterns = [
     url(r'^topic$', TopicCrudView.as_view()),
     url(r'^comment$', CommentCrudView.as_view()),
     url(r'^comment/list$', CommentListView.as_view()),
+    url(r'^vote$', VoteCrudView.as_view()),
 ]

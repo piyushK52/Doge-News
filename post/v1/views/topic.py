@@ -1,6 +1,7 @@
+from account.v1.serializers.dao import UUIDDao
+from post.v1.serializers.dao import AddTopicDao, UpdateTopicDao
 from middleware.auth import auth_required
 from account.v1.serializers.dto import TopicDto
-from account.v1.serializers.dao import AddTopicDao, UUIDDao, UpdateTopicDao
 from post.service import remove_all_topic_activity
 from app.models import Topic
 from middleware.response import bad_request, error, success
