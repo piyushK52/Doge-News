@@ -54,7 +54,7 @@ class PostListDao(serializers.Serializer):
 
 class AddCommentDao(serializers.Serializer):
     uuid = serializers.CharField(max_length=45)
-    content = serializers.TextField()
+    content = serializers.CharField()
     post_uuid = serializers.CharField(max_length=45)
     parent_comment_uuid = serializers.CharField(max_length=45)
     user_uuid = serializers.CharField(max_length=45)

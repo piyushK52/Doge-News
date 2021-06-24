@@ -5,7 +5,7 @@ from django.core.paginator import Paginator
 from django.db.models.aggregates import Sum
 from django.db.models.fields import NullBooleanField
 from post.service import remove_all_post_activity
-from account.v1.serializers.dto import PostDto
+from post.v1.serializers.dto import PostDto
 from app.models import Comment, Post, Vote
 from middleware.response import bad_request, error, success
 from rest_framework.views import APIView
