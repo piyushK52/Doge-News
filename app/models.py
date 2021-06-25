@@ -22,16 +22,16 @@ class BaseModel(models.Model):
         abstract = True
 
 
-class User(BaseModel):
+class UserProfile(BaseModel):
     uuid = models.UUIDField(default=uuid.uuid4)
     name = models.CharField(max_length=255, default="")
     email = models.CharField(max_length=255, default="")
-    password = models.CharField(max_length=45, default="")
+    password = models.CharField(max_length=225, default="")
     image_url = models.CharField(max_length=255, default="")
     bio = models.CharField(max_length=255, default="")
 
     class Meta:
-        db_table = 'user'
+        db_table = 'UserProfile'
 
     def save(self, *args, **kwargs):
         if not self.id:
@@ -39,7 +39,7 @@ class User(BaseModel):
             if self.password:
                 password = self.password
             self.password = PBKDF2PasswordHasher().encode(password)
-        super(User, self).save(*args, **kwargs)
+        super(UserProfile, self).save(*args, **kwargs)
 
 
 class Topic(BaseModel):
@@ -49,7 +49,7 @@ class Topic(BaseModel):
     url = models.CharField(max_length=255, default=None, null=True)
     category = models.CharField(max_length=45, default=None)
     source_name = models.CharField(max_length=45)
-    user_uuid = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    user = models.ForeignKey(UserProfile, on_delete=models.DO_NOTHING)
 
     class Meta:
         db_table = 'topic'
@@ -60,8 +60,8 @@ class Post(BaseModel):
     caption = models.TextField(default="", null=True)
     image_url = models.CharField(max_length=255, default=None, null=True)
     video_url = models.CharField(max_length=255, default=None, null=True)
-    topic_uuid = models.ForeignKey(Topic, on_delete=models.CASCADE)
-    user_uuid = models.ForeignKey(User, on_delete=models.CASCADE)
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'post'
@@ -70,9 +70,9 @@ class Post(BaseModel):
 class Comment(BaseModel):
     uuid = models.UUIDField(default=uuid.uuid4)
     content = models.TextField(default="")
-    post_uuid = models.ForeignKey(Post, on_delete=models.CASCADE)
-    parent_comment_uuid = models.ForeignKey('self', on_delete=models.CASCADE, default=0, null=True)
-    user_uuid = models.ForeignKey(User, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    parent_comment = models.ForeignKey('self', on_delete=models.CASCADE, default=0, null=True)
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'comment'
@@ -81,8 +81,8 @@ class Comment(BaseModel):
 class Vote(BaseModel):
     uuid = models.UUIDField(default=uuid.uuid4)
     value = models.IntegerField(default=0)
-    post_uuid = models.ForeignKey(Post, on_delete=models.CASCADE)
-    user_uuid = models.ForeignKey(User, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'vote'
@@ -91,8 +91,8 @@ class Vote(BaseModel):
 class CommentVote(BaseModel):
     uuid = models.UUIDField(default=uuid.uuid4)
     value = models.IntegerField(default=0)
-    comment_uuid = models.ForeignKey(Comment, on_delete=models.CASCADE)
-    user_uuid = models.ForeignKey(User, on_delete=models.CASCADE)
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'comment_vote'
@@ -101,7 +101,7 @@ class CommentVote(BaseModel):
 class Session(BaseModel):
     token = models.CharField(max_length=255)
     uuid = models.CharField(max_length=255)
-    user_uuid = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'session'
@@ -113,8 +113,8 @@ class Session(BaseModel):
 
 class Relationship(BaseModel):
     uuid = models.CharField(max_length=45)
-    follower_user_uuid = models.ForeignKey(User, on_delete=models.CASCADE, related_name='follower')
-    followed_user_uuid = models.ForeignKey(User, on_delete=models.CASCADE, related_name='followed')
+    follower_user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='follower')
+    followed_user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='followed')
 
     class Meta:
         db_table = 'relationship'

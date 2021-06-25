@@ -1,6 +1,6 @@
 from middleware.auth import auth_required
 from account.v1.serializers.dto import RelationshipDto, UserDto
-from app.models import Relationship, User
+from app.models import Relationship, UserProfile
 from middleware.response import bad_request, success
 from rest_framework.views import APIView
 from account.v1.serializers.dao import UUIDDao
@@ -57,7 +57,7 @@ class FollowerView(APIView):
             return bad_request(attributes.errors)
 
         follower_count = Relationship.objects.filter(followed_user_uuid=attributes.data['uuid']).all().count()
-        user = User.objects.filter(uuid=attributes.data['uuid']).first()
+        user = UserProfile.objects.filter(uuid=attributes.data['uuid']).first()
 
         response = {
             'data': {

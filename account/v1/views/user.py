@@ -1,7 +1,7 @@
 from middleware.auth import auth_required
 from account.service import remove_all_user_activity
 from account.v1.serializers.dto import UserDto
-from app.models import User
+from app.models import UserProfile
 from middleware.response import bad_request, error, success
 from account.v1.serializers.dao import AddUserDao, UUIDDao, UpdateUserDao
 from rest_framework.views import APIView
@@ -14,7 +14,7 @@ class UserCrudView(APIView):
         if not attributes.is_valid():
             return bad_request(attributes.error)
 
-        user = User.objects.create(**attributes.data)
+        user = UserProfile.objects.create(**attributes.data)
         response = {
             'data': UserDto(user).data
         }
@@ -27,7 +27,7 @@ class UserCrudView(APIView):
         if not attributes.is_valid():
             return bad_request(attributes.errors)
 
-        user = User.objects.filter(uuid=attributes.data['uuid'], is_disabled=False).first()
+        user = UserProfile.objects.filter(uuid=attributes.data['uuid'], is_disabled=False).first()
 
         if not user:
             return success({}, 'invalid user', False)
@@ -47,7 +47,7 @@ class UserCrudView(APIView):
         if not attributes.is_valid():
             return bad_request(attributes.errors)
 
-        user = User.objects.filter(uuid=attributes.data['uuid'], is_disabled=False).first()
+        user = UserProfile.objects.filter(uuid=attributes.data['uuid'], is_disabled=False).first()
         if not user:
             return success({}, 'invalid uuid', False)
 
@@ -64,7 +64,7 @@ class UserCrudView(APIView):
         if not attributes.is_valid():
             return bad_request(attributes.errors)
 
-        user = User.objects.filter(uuid=attributes.data['uuid'], is_disabled=False).first()
+        user = UserProfile.objects.filter(uuid=attributes.data['uuid'], is_disabled=False).first()
         if not user:
             return success({}, 'invalid uuid', False)
         

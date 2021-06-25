@@ -6,7 +6,7 @@ from django.db.models.aggregates import Sum
 from django.db.models.fields import NullBooleanField
 from post.service import remove_all_post_activity
 from post.v1.serializers.dto import PostDto
-from app.models import Comment, Post, Vote
+from app.models import Comment, Post, Topic, Vote
 from middleware.response import bad_request, error, success
 from rest_framework.views import APIView
 
@@ -15,10 +15,19 @@ class PostCrudView(APIView):
     @auth_required()
     def post(self, request):
         attributes = AddPostDao(data=request.data)
+        print("attirbutes found--> ", attributes)
         if not attributes.is_valid():
-            return bad_request(attributes.error)
+            return bad_request(attributes.errors)
 
-        post = Post.objects.create(**attributes.data)
+        dao_obj = attributes.data
+        dao_obj['user_id'] = request.user_id
+
+        topic = Topic.objects.filter(uuid=dao_obj['topic_uuid'], is_disabled=False).first()
+        if not topic:
+            return success({}, 'invalid topic uuid', False)
+        dao_obj['topic_id'] = topic.id
+        del dao_obj['topic_uuid']
+        post = Post.objects.create(**dao_obj)
         
         response = {
             'data': PostDto(post).data

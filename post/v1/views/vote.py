@@ -1,26 +1,32 @@
+from middleware.auth import auth_required
 from post.v1.serializers.dao import GetVoteDao, UpdateVoteDao
 from django.http import response
 from post.v1.serializers.dto import VoteDto
 from middleware.response import bad_request, success
-from app.models import Vote
+from app.models import Post, Vote
 from rest_framework.views import APIView
 
 
 class VoteCrudView(APIView):
-    
+    @auth_required()
     def put(self, request):
         attributes = UpdateVoteDao(data=request.data)
 
         if not attributes.is_valid():
             return bad_request(attributes.error)
 
-        vote = Vote.objects.filter(uuid=attributes.data['uuid']).first()
+        post = Post.objects.filter(uuid=attributes.data['uuid']).first()
 
-        if not vote:
+        if not post:
              return success({}, 'invalid post', False)
+
+        vote = Vote.objects.filter(post_id=post.id).first()
+        if not vote:
+            vote = Vote.objects.create(post_id=post.id, user_id=request.user_id, value=0)
+        value = vote.value
         
         if attributes.data['increment']:
-            value = vote.value + attributes.data['increment']
+            value += attributes.data['increment']
             setattr(vote, 'value', value)
             vote.save()
 

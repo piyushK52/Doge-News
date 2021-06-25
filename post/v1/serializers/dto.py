@@ -5,13 +5,13 @@ from app.models import Comment, Post, Vote, Topic
 class VoteDto(serializers.ModelSerializer):
     class Meta:
         model = Vote
-        fields = ('post_uuid', 'value')
+        fields = ('uuid', 'value')
 
 
 class TopicDto(serializers.ModelSerializer):
     class Meta:
-        meta = Topic
-        fields = ('title', 'desc', 'url', 'category', 'created_on', 'source_name')
+        model = Topic
+        fields = ('uuid', 'title', 'desc', 'url', 'category', 'created_on', 'source_name')
 
 
 class PostDto(serializers.ModelSerializer):
@@ -19,7 +19,7 @@ class PostDto(serializers.ModelSerializer):
     
     class Meta:
         model = Post
-        fields = ('caption', 'image_url', 'video_url', 'created_on')
+        fields = ('uuid', 'caption', 'image_url', 'video_url', 'created_on', 'topic')
 
 
 class CommentDto(serializers.ModelSerializer):
@@ -27,7 +27,7 @@ class CommentDto(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ('vote_count')
+        fields = ('uuid', 'vote_count')
     
     def get_vote_count(self, obj):
         return self.context['vote_count']

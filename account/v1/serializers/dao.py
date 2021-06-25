@@ -6,7 +6,7 @@ class AddUserDao(serializers.Serializer):
     email = serializers.EmailField(max_length=255)
     image_url = serializers.CharField(max_length=255)
     bio = serializers.CharField(max_length=255)
-    password = serializers.CharField(max_length=45)
+    password = serializers.CharField(max_length=225)
 
 
 class UpdateUserDao(serializers.Serializer):

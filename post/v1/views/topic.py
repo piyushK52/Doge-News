@@ -15,7 +15,9 @@ class TopicCrudView(APIView):
         if not attributes.is_valid():
             return bad_request(attributes.error)
 
-        topic = Topic.objects.create(**attributes.data)
+        dao_object = attributes.data
+        dao_object['user_id'] = request.user_id
+        topic = Topic.objects.create(**dao_object)
         response = {
             'data': TopicDto(topic).data
         }

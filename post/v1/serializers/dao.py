@@ -3,10 +3,9 @@ from rest_framework import serializers
 
 class AddPostDao(serializers.Serializer):
     caption = serializers.CharField(max_length=255)
-    image_url = serializers.CharField(max_length=255)
-    video_url = serializers.CharField(max_length=255)
-    topic = serializers.CharField(max_length=45)
-    user_uuid = serializers.CharField(max_length=45)
+    image_url = serializers.CharField(max_length=255, allow_blank=True)
+    video_url = serializers.CharField(max_length=255, allow_blank=True)
+    topic_uuid = serializers.CharField(max_length=45)
 
 
 class UpdatePostDao(serializers.Serializer):

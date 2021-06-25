@@ -1,4 +1,4 @@
-from app.models import Session, User
+from app.models import Session, UserProfile
 from middleware.response import unauthorized
 from django.apps import apps
 
@@ -15,7 +15,7 @@ def auth_required():
             if not session:
                 return unauthorized({})
 
-            request.user = User.objects.get(uuid=session.user_uuid)
+            request.user_id = session.user.id
             request.token = auth_token
             return func(context, request)
         wrap.__name__ = func.__name__
