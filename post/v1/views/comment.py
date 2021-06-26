@@ -4,7 +4,7 @@ from django.db.models.aggregates import Sum
 from post.v1.serializers.dto import CommentDto
 from django.db import connection
 from account.v1.serializers.dao import UUIDDao
-from app.models import Comment, CommentVote, Vote
+from app.models import Comment, CommentVote, Post, Vote
 from middleware.response import bad_request, success
 from rest_framework.views import APIView
 from django.core.paginator import Paginator
@@ -19,7 +19,17 @@ class CommentCrudView(APIView):
         if not attributes.is_valid():
             return bad_request(attributes.errors)
 
-        comment = Comment.objects.create(**attributes.data)
+        post = Post.objects.filter(uuid=attributes.data['post_uuid']).first()
+        if not post:
+            return success({}, 'invalid post uuid', False)
+        
+        parent_comment_id = None
+        if attributes.data['parent_comment_uuid']:
+            parent_comment = Comment.objects.filter(uuid=attributes.data['parent_comment_uuid']).first()
+            if parent_comment:
+                parent_comment_id = parent_comment.id
+
+        comment = Comment.objects.create(post_id=post.id, user_id=request.user_id, parent_comment_id=parent_comment_id, content=attributes.data['content'])
 
         response = {
             'data': CommentDto(comment).data
@@ -49,31 +59,26 @@ class CommentCrudView(APIView):
     # fetches a particular comment and its children
     @auth_required()
     def get(self, request):
-        attributes = UUIDDao(data=request.data)
+        attributes = UUIDDao(data=request.query_params)
         if not attributes.is_valid():
             return bad_request(attributes.errors)
 
         parent_comment = Comment.objects.filter(uuid=attributes.data['uuid']).first()
-        vote_count = CommentVote.objects.filter(comment_uuid=attributes.data['uuid']).aggregate(Sum('value'))['value__sum']
-        context = {'vote_count': vote_count}
         if not parent_comment:
             return success({}, 'invalid uuid', False)
 
-        # write logic for fetching comments
-        child_comment_list = Comment.objects.filter(parent=parent_comment.uuid).order_by("value").all()
+        child_comment_list = Comment.objects.filter(parent_comment_id=parent_comment.id).all()
         replies = []
         for comment in child_comment_list:
-            vote = CommentVote.objects.filter(comment_uuid=attributes.data['uuid']).aggregate(Sum('value'))['value__sum']
             replies.append(
                 {
                     'comment': CommentDto(comment).data,
-                    'vote_count': vote 
                 }
             )
 
         response = {
             'data': {
-                'comment': CommentDto(parent_comment, context=context).data,
+                'comment': CommentDto(parent_comment).data,
                 'replies': replies
             } 
         }
@@ -91,7 +96,11 @@ class CommentListView(APIView):
         if not attributes.is_valid():
             return bad_request(attributes.errors)
 
-        comment_list = Comment.objects.filter(post_uuid=attributes.data['post_uuid']).all()
+        post = Post.objects.filter(uuid=attributes.data['post_uuid']).first()
+        if not post:
+            return success({}, 'invalid post uuid', False)
+
+        comment_list = Comment.objects.filter(post_id=post.id, parent_comment_id=None).all()
 
         data_per_page = 20
         paginator = Paginator(comment_list, data_per_page)
@@ -101,11 +110,9 @@ class CommentListView(APIView):
         paged_comment_object_list = paginator.page(attributes.data['page']).object_list
         paged_comment_list = []
         for comment in paged_comment_object_list:
-            vote = CommentVote.objects.filter(comment_uuid=attributes.data['uuid']).aggregate(Sum('value'))['value__sum']
             paged_comment_list.append(
                 {
                     'comment': CommentDto(comment).data,
-                    'vote_count': vote
                 }
             )
 

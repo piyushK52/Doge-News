@@ -74,7 +74,7 @@ class PostCrudView(APIView):
 
     @auth_required()
     def get(self, request):
-        attributes = UUIDDao(data=request.data)
+        attributes = UUIDDao(data=request.query_params)
         if not attributes.is_valid():
             return bad_request(attributes.errors)
 
@@ -82,21 +82,8 @@ class PostCrudView(APIView):
         if not post:
             return success({}, 'invalid uuid', False)
 
-        # fetching upvotes/downvotes of this post
-        vote_count = Vote.objects.filter(post_uuid=attributes.data['uuid']).aggregate(Sum('value'))['value__sum']
-
-        user_vote = Vote.objects.filter(post_uuid=attributes.data['uuid'], user_uuid=request.user.uuid).first().value
-
-        data = {
-            'post': PostDto(post).data,
-            'vote': {
-                'vote_count': vote_count,
-                'user_vote': user_vote
-            }
-        }
-        
         response = {
-            'data': data
+            'data': PostDto(post).data
         }
 
         return success(response, 'post fethced successfully', True)

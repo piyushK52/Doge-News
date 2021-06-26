@@ -20,9 +20,13 @@ class UpdateVoteDao(serializers.Serializer):
     increment = serializers.IntegerField()
 
 
+class CommentVoteDao(serializers.Serializer):
+    uuid = serializers.CharField(max_length=100)
+    increment = serializers.IntegerField()
+
+
 class GetVoteDao(serializers.Serializer):
     post_uuid = serializers.CharField(max_length=100)
-    user_uuid = serializers.CharField(max_length=100)
 
 
 class AddTopicDao(serializers.Serializer):
@@ -52,8 +56,6 @@ class PostListDao(serializers.Serializer):
 
 
 class AddCommentDao(serializers.Serializer):
-    uuid = serializers.CharField(max_length=45)
     content = serializers.CharField()
     post_uuid = serializers.CharField(max_length=45)
-    parent_comment_uuid = serializers.CharField(max_length=45)
-    user_uuid = serializers.CharField(max_length=45)
+    parent_comment_uuid = serializers.CharField(max_length=45, allow_null=True,)
