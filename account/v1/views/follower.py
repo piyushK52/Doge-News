@@ -15,33 +15,47 @@ class FollowerView(APIView):
         if not attributes.is_valid():
             return bad_request(attributes.errors)
 
-        relation = Relationship.objects.filter(follower_user_uuid=request.user.uuid, followed_user_uuid=attributes.data['uuid']).first()
+        user = UserProfile.objects.filter(uuid=attributes.data['uuid']).first()
+        if not user:
+            return success({}, 'invalid uuid', True)
+
+        if user.id == request.user_id:
+            return success({}, 'cannot follow self', True)
+        
+        relation = Relationship.objects.filter(follower_user_id=request.user_id, followed_user_id=user.id).first()
 
         if relation:
-            return success({}, 'relationship already exists', True)
+            return success({}, 'already following', True)
 
-        
-        relation = Relationship.objects.create({'follower_user_uuid': request.user.uuid, 'followed_user_uuid': attributes.data['uuid']})
+        print("printing relationship obj", request.user.id, user.id)
+        relation = Relationship.objects.create(follower_user_id=request.user_id, followed_user_id=user.id)
 
         response = {
             'data': RelationshipDto(relation).data
         }
 
-        return success({}, 'follower added successfully', True)
+        return success(response, 'follower added successfully', True)
 
 
     # for un-following someone
     @auth_required()
     def delete(self, request):
-        attributes = UUIDDao(data=request.data)
+        attributes = UUIDDao(data=request.query_params)
 
         if not attributes.is_valid():
             return bad_request(attributes.errors)
 
-        relation = Relationship.objects.filter(follower_user_uuid=request.user.uuid, followed_user_uuid=attributes.data['uuid']).first()
+        user = UserProfile.objects.filter(uuid=attributes.data['uuid']).first()
+        if not user:
+            return success({}, 'invalid uuid', True)
+
+        if user.id == request.user_id:
+            return success({}, 'operation not allowed on self', True)
+
+        relation = Relationship.objects.filter(follower_user_id=request.user_id, followed_user_id=user.id).first()
 
         if not relation:
-            return success({}, 'invalid uuid', True)
+            return success({}, 'follower absent', True)
 
         relation.delete()
 
@@ -56,8 +70,11 @@ class FollowerView(APIView):
         if not attributes.is_valid():
             return bad_request(attributes.errors)
 
-        follower_count = Relationship.objects.filter(followed_user_uuid=attributes.data['uuid']).all().count()
         user = UserProfile.objects.filter(uuid=attributes.data['uuid']).first()
+        if not user:
+            return success({}, 'invalid uuid', True)
+        
+        follower_count = Relationship.objects.filter(followed_user_id=user.id).all().count()
 
         response = {
             'data': {

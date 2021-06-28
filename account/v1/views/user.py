@@ -14,6 +14,10 @@ class UserCrudView(APIView):
         if not attributes.is_valid():
             return bad_request(attributes.error)
 
+        user = UserProfile.objects.filter(email=attributes.data['email']).first()
+        if user:
+            return success({}, 'email already exists', False)
+
         user = UserProfile.objects.create(**attributes.data)
         response = {
             'data': UserDto(user).data

@@ -97,7 +97,7 @@ class PostListView(APIView):
         if not attributes.is_valid():
             return bad_request(attributes.errors)
 
-        post_list = Post.objects.filter(post_uuid=attributes.data['post_uuid']).all()
+        post_list = Post.objects.all()
 
         data_per_page = 6
         paginator = Paginator(post_list, data_per_page)
@@ -105,25 +105,13 @@ class PostListView(APIView):
             return success({}, "invalid page number", False)
         
         paged_post_object_list = paginator.page(attributes.data['page']).object_list
-        paged_post_list = []
-        for post in paged_post_object_list:
-            vote_count = Vote.objects.filter(post_uuid=attributes.data['uuid']).aggregate(Sum('value'))['value__sum']
-            comment_count = Comment.objects.filter(post_uuid=attributes.data['uuid']).exclude(parent_comment_uuid__isnull=True).aggregate(Sum('value'))['value__sum']
-            paged_post_list.append(
-                {
-                    'post': PostDto(post).data,
-                    'vote_count': vote_count,
-                    'comment_count': comment_count
-                }
-            )
-
 
         response = {
             'data_per_page': data_per_page,
             'count': paginator.count,
             'total_pages': paginator.num_pages,
             'current_page': attributes.data['page'],
-            'data': paged_post_list
+            'data': PostDto(paged_post_object_list, many=True).data
         }
 
         return success(response, "post list fetched successfully", True)

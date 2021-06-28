@@ -11,8 +11,13 @@ class AddPostDao(serializers.Serializer):
 class UpdatePostDao(serializers.Serializer):
     uuid = serializers.CharField(max_length=100)
     caption = serializers.CharField(max_length=255)
-    image_url = serializers.CharField(max_length=255)
-    video_url = serializers.CharField(max_length=255)
+    image_url = serializers.CharField(max_length=255, required=False, allow_blank=True)
+    video_url = serializers.CharField(max_length=255, required=False, allow_blank=True)
+
+    def validate(self, data):
+        if 'image_url' not in data and 'video_url' not in data:
+            raise serializers.ValidationError("Must include either image_url or video_url")
+        return data
 
 
 class UpdateVoteDao(serializers.Serializer):
